@@ -29,7 +29,8 @@ passport.use(
   new GoogleStrategy({
     clientID: keys.googleClientID,
     clientSecret: keys.googleClientSecret,
-    callbackURL: '/auth/google/callback',
+    callbackURL: '/auth/google/callback', // can do a runtime decide domain on the file.  Easy
+    proxy: true, // this says, yeah its fine if the request is routed through a proxy
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
   }, (accessToken, refreshToken, profile, done) => { // note this is only called when the callbackURL has been sent a get
     User.findOne({ googleId: profile.id })  // returns a promise
