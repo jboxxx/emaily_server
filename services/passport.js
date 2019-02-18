@@ -32,19 +32,16 @@ passport.use(
     callbackURL: '/auth/google/callback', // can do a runtime decide domain on the file.  Easy
     proxy: true, // this says, yeah its fine if the request is routed through a proxy
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
-  }, (accessToken, refreshToken, profile, done) => { // note this is only called when the callbackURL has been sent a get
-    User.findOne({ googleId: profile.id })  // returns a promise
-      .then((existingUser) => {
-        if (existingUser) {
-          done(null, existingUser);
-        } else {
-          // we don't have a record with this ID, make a new record
-          // .save() returns a promise
-          new User({ googleId: profile.id })
-            .save()
-            .then(user => done(null, existingUser)); // continues
-        }
-      });
+  },
+    async (accessToken, refreshToken, profile, done) => { // note this is only called when the callbackURL has been sent a get
+      const existingUser = await User.findOne({ googleId: profile.id });
+
+      if (existingUser) {
+        return done(null, existingUser); // pass onto passport, which will serialize this.  Return doesn't matter
+      }
+
+      const user = await new User({ googleId: profile.id }).save();
+      done(null, user); // pass onto passport, which will serialize this
     }
   )
 );
